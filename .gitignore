@@ -1,3 +1,6 @@
 .venv/
-DATOS/
+DATOS/*
+!DATOS/*/
+DATOS/*/*
+!DATOS/*/.gitkeep
 __pycache__/
