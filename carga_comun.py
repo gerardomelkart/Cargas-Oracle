@@ -235,11 +235,11 @@ def generar_sql_create(
 
         definiciones.append(
             f"{validar_identificador(nombre)} "
-            f"VARCHAR2({longitud})"
+            f"VARCHAR2({longitud} CHAR)"
         )
 
     definiciones.append(
-        "TEXTFILENAME VARCHAR2(200)"
+        "TEXTFILENAME VARCHAR2(200 CHAR)"
     )
 
     return (
@@ -249,6 +249,132 @@ def generar_sql_create(
         f"({', '.join(definiciones)})"
     )
 
+
+def ajustar_estructura_tabla(
+    cursor,
+    esquema,
+    tabla,
+    columnas
+):
+    esquema = validar_identificador(
+        esquema
+    )
+
+    tabla = validar_identificador(
+        tabla
+    )
+
+    cursor.execute(
+        """
+        SELECT
+            COLUMN_NAME,
+            DATA_TYPE,
+            CHAR_LENGTH,
+            CHAR_USED
+        FROM ALL_TAB_COLUMNS
+        WHERE OWNER = :1
+        AND TABLE_NAME = :2
+        """,
+        [
+            esquema.upper(),
+            tabla.upper()
+        ]
+    )
+
+    columnas_actuales = {
+        fila[0]: {
+            "tipo": fila[1],
+            "longitud": fila[2],
+            "unidad": fila[3]
+        }
+        for fila in cursor.fetchall()
+    }
+
+    columnas_esperadas = [
+        (
+            validar_identificador(nombre),
+            min(
+                fin - inicio + 1,
+                4000
+            )
+        )
+        for nombre, inicio, fin in columnas
+    ]
+
+    columnas_esperadas.append(
+        (
+            "TEXTFILENAME",
+            200
+        )
+    )
+
+    for nombre, longitud in columnas_esperadas:
+        actual = columnas_actuales.get(
+            nombre.upper()
+        )
+
+        if actual is None:
+            cursor.execute(
+                f"ALTER TABLE "
+                f"{esquema}.{tabla} "
+                f"ADD ("
+                f"{nombre} "
+                f"VARCHAR2({longitud} CHAR)"
+                f")"
+            )
+
+            print(
+                f"Columna agregada: "
+                f"{nombre} "
+                f"VARCHAR2({longitud} CHAR)"
+            )
+
+            continue
+
+        if actual["tipo"] not in (
+            "VARCHAR",
+            "VARCHAR2",
+            "CHAR"
+        ):
+            raise RuntimeError(
+                f"La columna {nombre} tiene "
+                f"tipo {actual['tipo']} y no puede "
+                f"ajustarse automáticamente."
+            )
+
+        longitud_actual = (
+            actual["longitud"] or 0
+        )
+
+        usa_caracteres = (
+            actual["unidad"] == "C"
+        )
+
+        if (
+            longitud_actual < longitud
+            or not usa_caracteres
+        ):
+            nueva_longitud = max(
+                longitud_actual,
+                longitud
+            )
+
+            cursor.execute(
+                f"ALTER TABLE "
+                f"{esquema}.{tabla} "
+                f"MODIFY ("
+                f"{nombre} "
+                f"VARCHAR2("
+                f"{nueva_longitud} CHAR"
+                f")"
+            )
+
+            print(
+                f"Columna ajustada: "
+                f"{nombre} "
+                f"VARCHAR2("
+                f"{nueva_longitud} CHAR)"
+            )
 
 def preparar_tabla(
     conexion,
@@ -291,6 +417,13 @@ def preparar_tabla(
                 f"La tabla ya existe: "
                 f"{esquema}.{tabla}"
             )
+
+        ajustar_estructura_tabla(
+            cursor,
+            esquema,
+            tabla,
+            columnas
+        )
 
         cursor.execute(
             f"TRUNCATE TABLE "
@@ -344,8 +477,23 @@ def cargar_archivos(
         tabla
     )
 
-    cantidad_valores = (
-        len(columnas) + 1
+    nombres_columnas = [
+        validar_identificador(
+            nombre
+        )
+        for nombre, _, _ in columnas
+    ]
+
+    nombres_columnas.append(
+        "TEXTFILENAME"
+    )
+
+    lista_columnas = ", ".join(
+        nombres_columnas
+    )
+
+    cantidad_valores = len(
+        nombres_columnas
     )
 
     marcadores = ", ".join(
@@ -359,6 +507,7 @@ def cargar_archivos(
     sql_insert = (
         f"INSERT INTO "
         f"{esquema}.{tabla} "
+        f"({lista_columnas}) "
         f"VALUES ({marcadores})"
     )
 
