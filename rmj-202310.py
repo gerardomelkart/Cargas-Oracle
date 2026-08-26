@@ -7,7 +7,7 @@ if __name__ == "__main__":
             ConfigCarga(
                 nombre="MANDAMIENTOS",
                 esquema="CSNISPMANDAMIENTOS",
-                prefijo_tabla="Z_PYLOAD_MANDAMIENTOS",
+                prefijo_tabla="Z_PYLOAD_RMJ",
                 estructura="ESTRUCTURAS/CNI_MANDAMIENTOS.txt",
                 carpeta_datos="DATOS/RMJ",
                 archivos=(

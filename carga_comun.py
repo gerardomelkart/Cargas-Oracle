@@ -8,7 +8,6 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
 CONFIG_PATH = BASE_DIR / "configuracion.local.json"
-MESES = ("ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC")
 
 
 @dataclass(frozen=True)
@@ -47,7 +46,7 @@ def obtener_periodo_anterior():
 def obtener_sufijo_periodo():
     anio, mes = obtener_periodo_anterior()
 
-    return f"{MESES[mes - 1]}{anio}"
+    return f"{anio}{mes:02d}"
 
 
 def leer_configuracion():

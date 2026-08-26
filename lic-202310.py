@@ -7,7 +7,7 @@ if __name__ == "__main__":
             ConfigCarga(
                 nombre="LICENCIAS",
                 esquema="CSNISPLICENCIA",
-                prefijo_tabla="Z_PYLOAD_LICENCIA",
+                prefijo_tabla="Z_PYLOAD_LC",
                 estructura="ESTRUCTURAS/CNI_LICENCIAS.txt",
                 carpeta_datos="DATOS/LIC",
                 archivos=(
