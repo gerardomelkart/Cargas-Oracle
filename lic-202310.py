@@ -8,7 +8,7 @@ if __name__ == "__main__":
                 nombre="LICENCIAS",
                 esquema="CSNISPLICENCIA",
                 prefijo_tabla="Z_PYLOAD_LICENCIA",
-                estructura="ESTRUCTURAS/CNI_LICENCIAS_JUL.txt",
+                estructura="ESTRUCTURAS/CNI_LICENCIAS.txt",
                 carpeta_datos="DATOS/LIC",
                 archivos=(
                     "CNI_LICENCIAS.dat",

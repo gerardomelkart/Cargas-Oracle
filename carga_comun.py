@@ -19,7 +19,7 @@ class ConfigCarga:
     estructura: str
     carpeta_datos: str
     archivos: tuple[str, ...]
-    batch_size: int = 100
+    batch_size: int = 1000
 
 
 def obtener_driver():
@@ -370,6 +370,7 @@ def cargar_archivos(
         for ruta in archivos:
             lote = []
             procesadas = 0
+            siguiente_reporte = 10000
 
             print(
                 f"Procesando: {ruta}"
@@ -390,6 +391,10 @@ def cargar_archivos(
                     if len(lote) >= (
                         configuracion.batch_size
                     ):
+                        cantidad_lote = len(
+                            lote
+                        )
+
                         cursor.executemany(
                             sql_insert,
                             lote
@@ -397,11 +402,22 @@ def cargar_archivos(
 
                         conexion.commit()
 
-                        procesadas += len(
-                            lote
-                        )
+                        procesadas += cantidad_lote
 
                         lote.clear()
+
+                        if procesadas >= siguiente_reporte:
+                            print(
+                                f"Avance: "
+                                f"{procesadas:,} filas "
+                                f"insertadas..."
+                            )
+
+                            while (
+                                siguiente_reporte
+                                <= procesadas
+                            ):
+                                siguiente_reporte += 10000
 
                 if lote:
                     cursor.executemany(
