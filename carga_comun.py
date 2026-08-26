@@ -317,10 +317,11 @@ def ajustar_estructura_tabla(
             cursor.execute(
                 f"ALTER TABLE "
                 f"{esquema}.{tabla} "
-                f"ADD ("
+                f"MODIFY ("
                 f"{nombre} "
-                f"VARCHAR2({longitud} CHAR)"
-                f")"
+                f"VARCHAR2("
+                f"{nueva_longitud} CHAR"
+                f"))"
             )
 
             print(
