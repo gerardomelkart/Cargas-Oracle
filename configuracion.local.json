@@ -1,0 +1,7 @@
+{
+    "host": "10.106.1.52",
+    "port": 1521,
+    "service": "BBDDOracXDB",
+    "user": "SYS",
+    "password": "CN1sesnsp."
+}
