@@ -460,14 +460,31 @@ def ejecutar_carga(
         columnas = leer_estructura(
             estructura_path
         )
+        
+        archivos = sorted(
+            ruta
+            for ruta in datos_path.rglob("*")
+            if ruta.is_file()
+            and ruta.suffix.casefold() == ".dat"
+        )
 
-        archivos = [
-            buscar_archivo(
-                datos_path,
-                nombre
+        cantidad_esperada = len(
+            configuracion.archivos
+        )
+
+        if not archivos:
+            raise FileNotFoundError(
+                f"No se encontraron archivos .dat "
+                f"dentro de:\n{datos_path}"
             )
-            for nombre in configuracion.archivos
-        ]
+
+        if len(archivos) != cantidad_esperada:
+            raise RuntimeError(
+                f"Se esperaban {cantidad_esperada} "
+                f"archivo(s) .dat dentro de:\n"
+                f"{datos_path}\n"
+                f"Se encontraron: {len(archivos)}"
+            )
 
         tabla = (
             f"{configuracion.prefijo_tabla}_"

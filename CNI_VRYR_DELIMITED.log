@@ -1,8 +1,0 @@
-
-SQL*Loader: Release 12.2.0.1.0 - Production on Tue Aug 19 22:02:16 2025
-
-Copyright (c) 1982, 2017, Oracle and/or its affiliates.  All rights reserved.
-
-SQL*Loader-704: Internal error: ulconnect: OCIServerAttach [0]
-ORA-12514: TNS:listener does not currently know of service requested in connect descriptor
-
